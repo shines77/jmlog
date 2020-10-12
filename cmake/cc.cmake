@@ -96,7 +96,7 @@ if (${CMAKE_C_COMPILER_ID} STREQUAL "SUN")
   endif ()
 endif ()
 
-if (${CORE} STREQUAL "SKYLAKEX")
+if (DEFINED CORE AND ${CORE} STREQUAL "SKYLAKEX")
   if (NOT DYNAMIC_ARCH)
     if (NOT NO_AVX512)
       set (CCOMMON_OPT "${CCOMMON_OPT} -march=skylake-avx512")

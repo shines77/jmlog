@@ -153,7 +153,7 @@ else()
 endif()
 
 ## include("${PROJECT_SOURCE_DIR}/cmake/prebuild.cmake")
-set(CORE "")
+set(CORE "AMD64")
 if (DEFINED BINARY)
   message(STATUS "Compiling a ${BINARY}-bit binary.")
 endif()
