@@ -12,6 +12,6 @@ int main(int argn, char argv[])
     jmlog::setGlobalLogFile(BENCHMARK_LOG_FILE);
     jmlog::Logger log(jmlog::Level::Info);
     log.setLogFile("test.log");
-    log.info("11211", 1121);
+    log.info("value = %d\n\n", 1121);
     return 0;
 }
