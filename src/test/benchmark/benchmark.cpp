@@ -7,7 +7,7 @@
 #define BENCHMARK_LOG_FILE  "./benchmark-log.dat"
 #endif
 
-int main(int argn, char argv[])
+int main(int argc, char * argv[])
 {
     jmlog::setGlobalLogFile(BENCHMARK_LOG_FILE);
     jmlog::Logger log(jmlog::Level::Info);
