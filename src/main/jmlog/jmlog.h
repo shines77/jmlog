@@ -1,6 +1,6 @@
 
-#ifndef JMLOG_HEADER_H
-#define JMLOG_HEADER_H
+#ifndef JMLOG_ALL_H
+#define JMLOG_ALL_H
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
@@ -12,4 +12,4 @@ namespace jmlog {
 
 } // namespace jmlog
 
-#endif // JMLOG_HEADER_H
+#endif // JMLOG_ALL_H

@@ -19,8 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\src\main\jmlog\common.h" />
+    <ClInclude Include="..\..\..\..\src\main\jmlog\config.h" />
+    <ClInclude Include="..\..\..\..\src\main\jmlog\data_type.h" />
+    <ClInclude Include="..\..\..\..\src\main\jmlog\global.h" />
     <ClInclude Include="..\..\..\..\src\main\jmlog\jmlog.h" />
     <ClInclude Include="..\..\..\..\src\main\jmlog\logger.h" />
+    <ClInclude Include="..\..\..\..\src\main\jmlog\log_level.h" />
+    <ClInclude Include="..\..\..\..\src\main\jmlog\pattern.h" />
+    <ClInclude Include="..\..\..\..\src\main\jmlog\sink.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\main\jmlog\dll_main.cpp" />
