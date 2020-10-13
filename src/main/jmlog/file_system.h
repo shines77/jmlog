@@ -23,11 +23,11 @@
 #if defined(WIN32) || defined(_WIN32) || defined(_WINDOWS_)
 #define JM_PATH_SEPARATOR           '\\'
 #define JM_PATH_SEPARATOR_FILTER    '/'
-#define JM_PATH_SEPARATOR_CHAR      ';'
+#define JM_PATH_DELIMITER           ';'
 #else
 #define JM_PATH_SEPARATOR           '/'
 #define JM_PATH_SEPARATOR_FILTER    '\\'
-#define JM_PATH_SEPARATOR_CHAR      ':'
+#define JM_PATH_DELIMITER           ':'
 
 #define JM_PATH_ROOT_SEPARATOR      ':'
 #endif // WIN32
@@ -36,23 +36,26 @@ namespace jmlog {
 namespace fs {
 
 template <typename CharTy>
-class BasicPathName {
+class BasicPath {
 public:
     typedef CharTy                          char_type;
     typedef std::basic_string<char_type>    string_type;
+    typedef BasicPath<char_type>            this_type;
 
 private:
     string_type filename_;
 
 public:
-    BasicPathName(const string_type & filename) : filename_(filterPath(filename)) {}
-    ~BasicPathName() {}
+    BasicPath(const string_type & filename)
+        : filename_(this_type::filterPath(filename)) {
+    }
+    ~BasicPath() {}
 
-    string_type & str() {
+    string_type & filename() {
         return this->filename_;
     }
 
-    const string_type & str() const {
+    const string_type & filename() const {
         return this->filename_;
     }
 
@@ -60,6 +63,7 @@ public:
         this->filename_ = this->filterPath(filename);
     }
 
+    static
     string_type filterPath(const string_type & filename) {
         string_type path = filename;
         for (std::size_t pos = 0; pos != string_type::npos;) {
@@ -90,8 +94,8 @@ public:
     }
 };
 
-typedef BasicPathName<char>     PathName;
-typedef BasicPathName<wchar_t>  WPathName;
+typedef BasicPath<char>     Path;
+typedef BasicPath<wchar_t>  WPath;
 
 } // namespace fs
 } // namespace jmlog

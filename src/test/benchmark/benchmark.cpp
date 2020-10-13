@@ -19,9 +19,9 @@ using namespace jmlog;
 #endif
 #endif
 
-#define BENCHMARK_CONF_FILE fs::PathName("./benchmark-log.conf")
-#define BENCHMARK_LOG_FILE  fs::PathName("./benchmark-log.dat")
-#define BENCHMARK_LOG_DIR   fs::PathName("./benchmark-log")
+#define BENCHMARK_CONF_FILE fs::Path("./benchmark-log.conf")
+#define BENCHMARK_LOG_FILE  fs::Path("./benchmark-log.dat")
+#define BENCHMARK_LOG_DIR   fs::Path("./benchmark-log")
 
 int setting_conf_file(ConfigFile & config)
 {

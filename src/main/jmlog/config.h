@@ -69,7 +69,7 @@ class BasicConfigFile {
 public:
     typedef CharTy                          char_type;
     typedef std::basic_string<char_type>    string_type;
-    typedef fs::BasicPathName<char_type>    path_name_t;
+    typedef fs::BasicPath<char_type>        path_type;
 
 private:
     string_type filename_;
@@ -80,7 +80,7 @@ public:
     BasicConfigFile() {
         this->init();
     }
-    explicit BasicConfigFile(const path_name_t & filename) : filename_(filename.str()) {
+    explicit BasicConfigFile(const path_type & path) : filename_(path.filename()) {
         this->loadConfig(this->filename_);
     }
 
@@ -88,20 +88,20 @@ public:
 
     void init() {
         string_type tmp;
-        path_name_t dir(getDefaultRootDir(&tmp));
-        this->root_dir_ = dir.str();
+        path_type dir(getDefaultRootDir(&tmp));
+        this->root_dir_ = dir.filename();
     }
 
-    int setLogRootDirectory(const path_name_t & root_dir) {
-        this->root_dir_ = root_dir.str();
+    int setLogRootDirectory(const path_type & root_dir) {
+        this->root_dir_ = root_dir.filename();
         return 0;
     }
 
-    int loadConfig(const path_name_t & pathname) {
+    int loadConfig(const path_type & path) {
         int result = 0;
         static const std::size_t kBufSize = 8192;
         std::ifstream ifs;
-        const string_type & filename = pathname.str();
+        const string_type & filename = path.filename();
         try {
             ifs.open(filename, std::ios::in | std::ios::binary);
             if (ifs.is_open()) {
