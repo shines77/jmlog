@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdarg.h>
+#include <string.h>     // For strerror()
 #include <errno.h>
 
 #include <cstdint>
