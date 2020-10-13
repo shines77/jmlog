@@ -131,7 +131,7 @@ public:
                 result = errno;
 #endif
                 ::printf("<<Error>>:\n\n"
-                         "File: %s, Line: %u\n"
+                         "SourceFile: %s, Line: %u\n"
                          "errno: %d\n"
                          "Reason: %s\n\n"
                          "ConfigFile::loadConfig(filename):\n"
@@ -150,7 +150,7 @@ public:
             result = errno;
 #endif
             ::printf("<<Exception>>:\n\n"
-                     "File: %s, Line: %u\n"
+                     "SourceFile: %s, Line: %u\n"
                      "errno: %d\n"
                      "Reason: %s\n\n"
                      "ConfigFile::loadConfig(filename):\n"
