@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdarg.h>
+#include <memory.h>
 #include <string.h>     // For strerror()
 #include <errno.h>
 
@@ -20,6 +21,7 @@
 #include <fstream>
 #include <string>
 #include <memory>
+#include <cstring>
 #include <stdexcept>
 #include <unordered_map>
 
