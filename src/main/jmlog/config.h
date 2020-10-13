@@ -86,15 +86,16 @@ public:
 #if defined(WIN32) || defined(_WIN32) || defined(_WINDOWS_)
                 result = (int)::GetLastError();
 #else
-                result = ::_errno();;
+                result = errno;
 #endif
-                ::printf("<Error>:\n\n"
+                ::printf("<<Error>>:\n\n"
                          "File: %s, Line: %u\n"
                          "errno: %d\n"
+                         "Reason: %s\n"
                          "ConfigFile::loadConfig(filename):\n"
                          "%s\n\n",
                          __FILE__, uint32_t(__LINE__),
-                         result,
+                         result, ::strerror(result),
                          "Info: Read config failed.");
             }
         }
@@ -102,15 +103,17 @@ public:
 #if defined(WIN32) || defined(_WIN32) || defined(_WINDOWS_)
             result = (int)::GetLastError();
 #else
-            result = ::_errno();;
+            result = errno;
 #endif
-            ::printf("Exception info:\n\n"
+            ::printf("<<Exception>>:\n\n"
                      "File: %s, Line: %u\n"
                      "errno: %d\n"
+                     "Reason: %s\n"
                      "ConfigFile::loadConfig(filename):\n"
-                     "%s\n\n",
+                     "Info: %s\n\n",
                      __FILE__, uint32_t(__LINE__),
-                     result, ex.what());
+                     result, ::strerror(result),
+                     ex.what());
         }
 
         return result;

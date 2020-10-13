@@ -3,6 +3,8 @@
 //#define _USE_ATTRIBUTES_FOR_SAL     1
 //#endif
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #if defined(_MSC_VER)
 #pragma warning(disable: 4467)
 #endif
