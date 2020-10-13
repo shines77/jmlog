@@ -23,18 +23,34 @@
 
 namespace jmlog {
 
-static std::string jmlog_log_filename;
 static ConfigFile  jmlog_config;
+static WConfigFile jmlog_wconfig;
 
-void setGlobalLogFile(const std::string & filename)
-{
-    jmlog_log_filename = filename;
+template <typename CharTy>
+static
+BasicConfigFile<CharTy> & getGlobalConfig() {
+    return jmlog_config;
 }
 
-bool init(const std::string & conf_file, const std::string & log_file)
+static
+BasicConfigFile<wchar_t> & getGlobalConfig() {
+    return jmlog_wconfig;
+}
+
+template <typename CharTy>
+static
+bool init(const std::basic_string<CharTy> & conf_file,
+          const std::basic_string<CharTy> & log_file)
 {
-    int loadStatus = jmlog_config.loadConfig(conf_file);
-    setGlobalLogFile(log_file);
+    int loadStatus = getGlobalConfig<CharTy>().loadConfig(conf_file);
+    return (loadStatus == 0);
+}
+
+template <typename CharTy>
+static
+bool init(const BasicConfigFile<CharTy> & config)
+{
+    getGlobalConfig<CharTy>() = config;
     return true;
 }
 

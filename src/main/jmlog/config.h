@@ -12,7 +12,7 @@
 #include <stddef.h>
 #include <stdarg.h>
 #include <memory.h>
-#include <string.h>     // For strerror()
+#include <string.h>     // For ::strerror()
 #include <errno.h>
 
 #include <cstdint>
@@ -25,7 +25,11 @@
 #include <stdexcept>
 #include <unordered_map>
 
+#include "jmlog/common.h"
+#include "jmlog/file_system.h"
+
 #if defined(WIN32) || defined(_WIN32) || defined(_WINDOWS_)
+
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX
@@ -36,6 +40,7 @@
 #include <Windows.h>
 #endif // NOMINMAX
 #endif // WIN32_LEAN_AND_MEAN
+
 #endif // WIN32
 
 //
@@ -43,26 +48,60 @@
 // See: https://blog.csdn.net/sinat_36219858/article/details/80369255
 //
 
+#define JMLOG_DEFAULT_ROOT_DIR      "./LogRoot"
+
 namespace jmlog {
 
-class ConfigFile {
+std::basic_string<char> getDefaultRootDir(std::basic_string<char> * p = nullptr)
+{
+    (void)p;
+    return std::basic_string<char>(JMLOG_DEFAULT_ROOT_DIR);
+}
+
+std::basic_string<wchar_t> getDefaultRootDir(std::basic_string<wchar_t> * p = nullptr)
+{
+    (void)p;
+    return std::basic_string<wchar_t>(JMLOG_WCHAR(JMLOG_DEFAULT_ROOT_DIR));
+}
+
+template <typename CharTy>
+class BasicConfigFile {
+public:
+    typedef CharTy                          char_type;
+    typedef std::basic_string<char_type>    string_type;
+    typedef fs::BasicPathName<char_type>    path_name_t;
+
 private:
-    std::string filename_;
-    std::string root_dir_;
-    std::string content_;
+    string_type filename_;
+    string_type root_dir_;
+    string_type content_;
 
 public:
-    ConfigFile() {}
-    explicit ConfigFile(const std::string & filename) : filename_(filename) {
-        loadConfig(filename_);
+    BasicConfigFile() {
+        this->init();
+    }
+    explicit BasicConfigFile(const path_name_t & filename) : filename_(filename.str()) {
+        this->loadConfig(this->filename_);
     }
 
-    ~ConfigFile() {}
+    ~BasicConfigFile() {}
 
-    int loadConfig(const std::string & filename) {
+    void init() {
+        string_type tmp;
+        path_name_t dir(getDefaultRootDir(&tmp));
+        this->root_dir_ = dir.str();
+    }
+
+    int setLogRootDirectory(const path_name_t & root_dir) {
+        this->root_dir_ = root_dir.str();
+        return 0;
+    }
+
+    int loadConfig(const path_name_t & pathname) {
         int result = 0;
         static const std::size_t kBufSize = 8192;
         std::ifstream ifs;
+        const string_type & filename = pathname.str();
         try {
             ifs.open(filename, std::ios::in | std::ios::binary);
             if (ifs.is_open()) {
@@ -78,9 +117,9 @@ public:
                         std::streamsize read_bytes = ifs.gcount();
                         if (read_bytes > 0) {
                             std::memcpy(data, buf, read_bytes);
+                            data += read_bytes;
+                            file_size -= read_bytes;
                         }
-                        data += read_bytes;
-                        file_size -= read_bytes;
                     }
                 }
                 ifs.close();
@@ -96,9 +135,11 @@ public:
                          "errno: %d\n"
                          "Reason: %s\n\n"
                          "ConfigFile::loadConfig(filename):\n"
+                         "filename = %s\n"
                          "Info: %s\n\n",
                          __FILE__, uint32_t(__LINE__),
                          result, ::strerror(result),
+                         filename.c_str(),
                          "Read config failed.");
             }
         }
@@ -113,15 +154,20 @@ public:
                      "errno: %d\n"
                      "Reason: %s\n\n"
                      "ConfigFile::loadConfig(filename):\n"
+                     "filename = %s\n"
                      "Info: %s\n\n",
                      __FILE__, uint32_t(__LINE__),
                      result, ::strerror(result),
+                     filename.c_str(),
                      ex.what());
         }
 
         return result;
     }
 };
+
+typedef BasicConfigFile<char>       ConfigFile;
+typedef BasicConfigFile<wchar_t>    WConfigFile;
 
 } // namespace jmlog
 

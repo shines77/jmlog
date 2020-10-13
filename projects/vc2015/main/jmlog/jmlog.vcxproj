@@ -22,6 +22,7 @@
     <ClInclude Include="..\..\..\..\src\main\jmlog\common.h" />
     <ClInclude Include="..\..\..\..\src\main\jmlog\config.h" />
     <ClInclude Include="..\..\..\..\src\main\jmlog\data_type.h" />
+    <ClInclude Include="..\..\..\..\src\main\jmlog\file_system.h" />
     <ClInclude Include="..\..\..\..\src\main\jmlog\global.h" />
     <ClInclude Include="..\..\..\..\src\main\jmlog\jmlog.h" />
     <ClInclude Include="..\..\..\..\src\main\jmlog\logger.h" />

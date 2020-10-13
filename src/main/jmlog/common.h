@@ -8,9 +8,18 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <tchar.h>
 
 #include <cstdint>
 #include <cstddef>
+
+#ifndef __WCHAR
+#define __WCHAR(x)          L ## x
+#endif
+
+#ifndef JMLOG_WCHAR
+#define JMLOG_WCHAR(x)      __WCHAR(x)
+#endif
 
 #define ENABLE_MSVC_PRINTF_CHECK    1
 
