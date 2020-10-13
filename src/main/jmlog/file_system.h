@@ -32,8 +32,21 @@
 #define JM_PATH_ROOT_SEPARATOR      ':'
 #endif // WIN32
 
+//
+// Node.js - filesystem - path
+// See: http://nodejs.cn/api/path.html
+//
+
 namespace jmlog {
 namespace fs {
+
+static bool is_windows() {
+#if defined(WIN32) || defined(_WIN32) || defined(_WINDOWS_)
+    return true;
+#else
+    return false;
+#endif
+}
 
 template <typename CharTy>
 class BasicPath {
@@ -41,6 +54,14 @@ public:
     typedef CharTy                          char_type;
     typedef std::basic_string<char_type>    string_type;
     typedef BasicPath<char_type>            this_type;
+
+    static const char_type kSeparator = char_type(JM_PATH_SEPARATOR);
+    static const char_type kSeparatorFilter = char_type(JM_PATH_SEPARATOR_FILTER);
+    static const char_type kDelimiter = char_type(JM_PATH_DELIMITER);
+
+#if defined(JM_PATH_ROOT_SEPARATOR)
+    static const char_type kRootSeparator = char_type(JM_PATH_ROOT_SEPARATOR);
+#endif
 
 private:
     string_type filename_;
@@ -67,9 +88,9 @@ public:
     string_type filterPath(const string_type & filename) {
         string_type path = filename;
         for (std::size_t pos = 0; pos != string_type::npos;) {
-            pos = path.find(JM_PATH_SEPARATOR_FILTER, pos);
+            pos = path.find(kSeparatorFilter, pos);
             if (pos != string_type::npos) {
-                path.replace(pos, 1, 1, JM_PATH_SEPARATOR);
+                path.replace(pos, 1, 1, kSeparator);
                 pos++;
             }
             else {
@@ -79,10 +100,10 @@ public:
 
 #if defined(JM_PATH_ROOT_SEPARATOR)
         for (std::size_t pos = 0; pos != string_type::npos; pos++) {
-            pos = path.find(JM_PATH_ROOT_SEPARATOR, pos);
+            pos = path.find(kRootSeparator, pos);
             if (pos > 0 && ((path[0] >= 'A' && path[0] >= 'Z') ||
                             (path[0] >= 'a' && path[0] >= 'z'))) {
-                path.replace(0, 3, 1, JM_PATH_SEPARATOR);
+                path.replace(0, 3, 1, kSeparator);
                 break;
             }
             else if (pos == string_type::npos) {
