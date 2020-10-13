@@ -94,12 +94,12 @@ public:
                 ::printf("<<Error>>:\n\n"
                          "File: %s, Line: %u\n"
                          "errno: %d\n"
-                         "Reason: %s\n"
+                         "Reason: %s\n\n"
                          "ConfigFile::loadConfig(filename):\n"
-                         "%s\n\n",
+                         "Info: %s\n\n",
                          __FILE__, uint32_t(__LINE__),
                          result, ::strerror(result),
-                         "Info: Read config failed.");
+                         "Read config failed.");
             }
         }
         catch (const std::exception & ex) {
@@ -111,7 +111,7 @@ public:
             ::printf("<<Exception>>:\n\n"
                      "File: %s, Line: %u\n"
                      "errno: %d\n"
-                     "Reason: %s\n"
+                     "Reason: %s\n\n"
                      "ConfigFile::loadConfig(filename):\n"
                      "Info: %s\n\n",
                      __FILE__, uint32_t(__LINE__),
