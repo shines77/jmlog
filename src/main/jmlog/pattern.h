@@ -20,23 +20,94 @@
 #include "jmlog/log_level.h"
 #include "jmlog/common.h"
 
+#define jmLog_Write_Info(log, pattern, fmt, ...) \
+    do { \
+        int tmp = MSVC_PRINTF_CHECK(fmt, __VA_ARGS__);  \
+        log.info(pattern, fmt, __VA_ARGS__);            \
+    } while (0)
+
+#define jmRegisterPattern(log, fmt, ...) \
+    do { \
+        int tmp = MSVC_PRINTF_CHECK(fmt, __VA_ARGS__);          \
+        int pattern_id = jmlog::ptr2int(fmt);                   \
+        const Pattern & __pattern = log.registerPattern(        \
+            __FILE__, std::size_t(__LINE__), fmt, __VA_ARGS__); \
+        log.info(__pattern, fmt, __VA_ARGS__);                  \
+    } while (0)
+
+#define jmRegisterPattern2(log, fmt, ...) \
+    do { \
+        int tmp = MSVC_PRINTF_CHECK(fmt, __VA_ARGS__);          \
+        int pattern_id = jmlog::ptr2int(fmt);                   \
+        const Pattern & __pattern = log.registerPattern(        \
+            __FILE__, std::size_t(__LINE__), fmt, __VA_ARGS__); \
+        log.info(__pattern, fmt, __VA_ARGS__);                  \
+    } while (0)
+
 namespace jmlog {
 
 template <typename CharTy>
 class BasicPattern {
+public:
+    typedef CharTy                          char_type;
+    typedef std::basic_string<char_type>    string_type;
+    typedef BasicPattern<CharTy>            this_type;
+
 private:
-    std::string fmt_;
+    const char_type *   fmt_;
+    std::size_t         line_no_;
+    string_type         format_;
+    string_type         filename_;
 
 public:
-    BasicPattern(const std::string & fmt) : fmt_(fmt) {}
+    BasicPattern(const char_type * fmt) : fmt_(fmt), line_no_(-1), format_(fmt) {
+    }
+    BasicPattern(const char_type * fmt,
+                 std::size_t line_no,
+                 const string_type & filename)
+        : fmt_(fmt), line_no_(line_no), format_(fmt), filename_(filename) {
+    }
     ~BasicPattern() {}
 
-    const std::string & getFormat() const {
+    string_type & getFmt() {
         return this->fmt_;
     }
 
-    void setFormat(const std::string & fmt) {
+    const string_type & getFmt() const {
+        return this->fmt_;
+    }
+
+    string_type & getFormat() {
+        return this->format_;
+    }
+
+    const string_type & getFormat() const {
+        return this->format_;
+    }
+
+    void setFormat(const char_type * fmt) {
         this->fmt_ = fmt;
+        this->format_ = fmt;
+    }
+
+    string_type & getSourceFile() {
+        return this->filename_;
+    }
+
+    const string_type & getSourceFile() const {
+        return this->filename_;
+    }
+
+    void setSourceFile(const string_type & filename) {
+        this->filename_ = filename;
+    }
+
+    std::size_t & getLineNo() const {
+        return this->line_no_;
+    }
+
+    void setLineNo(std::size_t line_no) {
+        this->line_no_ = line_no;
     }
 };
 

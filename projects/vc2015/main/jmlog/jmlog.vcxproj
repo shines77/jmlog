@@ -29,6 +29,7 @@
     <ClInclude Include="..\..\..\..\src\main\jmlog\log_level.h" />
     <ClInclude Include="..\..\..\..\src\main\jmlog\pattern.h" />
     <ClInclude Include="..\..\..\..\src\main\jmlog\sink.h" />
+    <ClInclude Include="..\..\..\..\src\main\jmlog\utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\main\jmlog\dll_main.cpp" />

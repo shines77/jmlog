@@ -19,7 +19,15 @@
 #include <unordered_map>
 
 #include "jmlog/common.h"
+#include "jmlog/utils.h"
 #include "jmlog/config.h"
+
+static int32_t jm_i32 = 32;
+static int64_t jm_i64 = 64;
+static uint32_t jm_u32 = 32;
+static uint64_t jm_u64 = 64;
+static const char * jm_string = "jm_string";
+static const wchar_t * jm_wstring = L"jm_wstring";
 
 namespace jmlog {
 

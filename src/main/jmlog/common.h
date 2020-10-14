@@ -58,11 +58,11 @@
 
 #if ENABLE_MSVC_PRINTF_CHECK
 # ifndef MSVC_PRINTF_CHECK
-#  define MSVC_PRINTF_CHECK(...)    (0 && ::snprintf(nullptr, 0, ##__VA_ARGS__))
+#  define MSVC_PRINTF_CHECK(...)   (0 && ::snprintf(nullptr, 0, ##__VA_ARGS__))
 #  if defined(__cplusplus)
     // in C++ we can allow macros that optionally take a format parameter, typical of macros that
     // translate an empty format into a newline or such.
-    static inline int snprintf(const char * fmt, std::size_t len) {
+    static inline int snprintf(char * buf, std::size_t count) {
         return 0;
     }
 #  endif
@@ -70,8 +70,5 @@
 #  define MSVC_PRINTF_CHECK(...)    ((void)(0))
 # endif // MSVC_PRINTF_CHECK
 #endif // ENABLE_MSVC_PRINTF_CHECK
-
-#define jmLog_Write_Info(log, pattern, ...) \
-    do { int tmp = MSVC_PRINTF_CHECK(__VA_ARGS__); log.info(pattern, __VA_ARGS__); } while (0)
 
 #endif // JMLOG_COMMON_H

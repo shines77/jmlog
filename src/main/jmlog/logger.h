@@ -30,17 +30,18 @@ namespace jmlog {
 template <typename CharTy, typename Sinker = BasicConsoleSink<CharTy> >
 class BasicLogger {
 public:
-    typedef CharTy                      char_type;
-    typedef Sinker                      sink_type;
-    typedef BasicPattern<CharTy>        pattern_type;
-    typedef BasicLogger<CharTy, Sinker> this_type;
+    typedef CharTy                          char_type;
+    typedef Sinker                          sink_type;
+    typedef std::basic_string<char_type>    string_type;
+    typedef BasicPattern<CharTy>            pattern_type;
+    typedef BasicLogger<CharTy, Sinker>     this_type;
 
     typedef std::unordered_map<std::string, pattern_type>
-                                        pattern_map_t;
+                                            pattern_map_t;
 
 protected:
-    Level       level_;
-    std::string     filename_;
+    Level           level_;
+    string_type     filename_;
     sink_type       sink_;
     pattern_map_t   pattern_map_;
 
@@ -56,23 +57,37 @@ public:
         this->level_ = level;
     }
 
-    std::string & getLogFile() {
+    string_type & getLogFile() {
         return this->filename_;
     }
 
-    const std::string & getLogFile() const {
+    const string_type & getLogFile() const {
         return this->filename_;
     }
 
-    void setLogFile(const std::string & filename) {
+    void setLogFile(const string_type & filename) {
         this->filename_ = filename;
     }
 
-    const pattern_type & createPattern(const char_type * fmt, ...) {
-        pattern_type pattern(fmt);
-        auto result = pattern_map_.emplace(fmt, pattern);
-        typename pattern_map_t::const_iterator iter = result.first;
-        return iter->second;        
+    const pattern_type & registerPattern(const char_type * file, std::size_t line_no, 
+                                         MSVC_FORMAT_STRING(const char_type * fmt), ...)
+                                         JMLOG_FORMAT_ATTR(printf, 3, 4) {
+        typedef typename pattern_map_t::const_iterator  const_iterator;
+        const_iterator iter = this->pattern_map_.find(fmt);
+        if (iter != this->pattern_map_.end()) {
+            return iter->second;
+        }
+        else {
+            pattern_type pattern(fmt, line_no, file);
+            auto result = this->pattern_map_.emplace(fmt, pattern);
+            if (result.second == true) {
+                const_iterator value = result.first;
+                return value->second;
+            }
+            else {
+                throw std::runtime_error("BasicLogger<T>::registerPattern() failed.");
+            }
+        }
     }
 
     void log(const char_type * fmt, ...) {

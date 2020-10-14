@@ -40,9 +40,12 @@ int main(int argc, char * argv[])
     jmlog::Logger log(jmlog::Level::Info);
     log.setLogFile("test.log");
     log.info("value = %d, %d\n\n", 1121, 23213);
-    const Pattern & pattern = log.createPattern("value = %d, %s\n\n", jm::i32, jm::String);
+    const Pattern & pattern = log.registerPattern(__FILE__, __LINE__,
+                                  "value = %d, %s\n\n", jm_i32, jm_string);
     log.info(pattern, "value = %d, %s\n\n", 1726187, "str");
     jmLog_Write_Info(log, pattern, "value = %d, %s\n\n", 1726187, "232");
+
+    jmRegisterPattern(log, "value = %d, %s\n\n", jm_i32, jm_string);
 
     jmlog::finalize();
     return 0;
