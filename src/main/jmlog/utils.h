@@ -28,6 +28,18 @@ static int ptr2int(const T * ptr)
     return static_cast<int>(val);
 }
 
+const char * string_fmt(const char * p = nullptr)
+{
+    (void)p;
+    return "[%s] ";
+}
+
+const wchar_t * string_fmt(const wchar_t * p = nullptr)
+{
+    (void)p;
+    return L"[%s] ";
+}
+
 } // namespace jmlog
 
 #endif // JMLOG_UTILS_H
