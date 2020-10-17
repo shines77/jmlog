@@ -45,8 +45,6 @@ int main(int argc, char * argv[])
     log.info(pattern, "value = %d, %s\n\n", 1726187, "str");
     jmlog_info(log, "value = %d, %s\n\n", 1726187, "232");
 
-    jmRegisterPattern(log, pattern2, "value = %d, %s\n\n", jm_i32, jm_string);
-
     jmlog::finalize();
     return 0;
 }

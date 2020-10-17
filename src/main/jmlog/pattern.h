@@ -20,10 +20,10 @@
 #include "jmlog/log_level.h"
 #include "jmlog/common.h"
 
-#define jmlog_write_log(logger, type, pattern, fmt, ...) \
+#define jmlog_write_log(logger, level, pattern, fmt, ...) \
     do { \
         int tmp = MSVC_PRINTF_CHECK(fmt, __VA_ARGS__);  \
-        logger.log(type, fmt, __VA_ARGS__);             \
+        logger.log(level, fmt, __VA_ARGS__);             \
     } while (0)
 
 #define jmlog_info(log, fmt, ...) \
