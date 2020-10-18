@@ -105,6 +105,22 @@ void test_cpu_fences()
 #endif
 }
 
+const char * getFileName(const char * const path)
+{
+    const char * startPosition = (const char *)path;
+    for (const char * currentCharacter = startPosition; *currentCharacter != '\0'; ++currentCharacter) {
+        if (*currentCharacter == '\\' || *currentCharacter == '/') {
+            startPosition = currentCharacter;
+        }
+    }
+
+    if (startPosition != path) {
+        ++startPosition;
+    }
+
+    return startPosition;
+}
+
 int setting_conf_file(ConfigFile & config)
 {
     config.loadConfig(BENCHMARK_CONF_FILE);
@@ -128,7 +144,10 @@ int main(int argc, char * argv[])
     jmlog_info(log, "value = %d, %s\n\n", 1726187, "232");
 
     log.info("__FILE__ = %s\n\n", __FILE__);
-    log.info("__FUNCTION__ = %s\n\n", __FUNCTION__);
+#if defined(__GUNC__)
+    log.info("__BASE_FILE__ = %s\n\n", __BASE_FILE__);
+#endif
+    log.info("__FUNCTION__ = %s()\n\n", __FUNCTION__);
     jmlog_info(log, "kSourceRootDirOffset = %" PRIuPTR "\n\n", kJmSourceRootDirOffset);
 
     //test_cpu_fences();
