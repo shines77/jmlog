@@ -128,9 +128,10 @@ int main(int argc, char * argv[])
     jmlog_info(log, "value = %d, %s\n\n", 1726187, "232");
 
     log.info("__FILE__ = %s\n\n", __FILE__);
+    log.info("__FUNCTION__ = %s\n\n", __FUNCTION__);
     jmlog_info(log, "kSourceRootDirOffset = %" PRIuPTR "\n\n", kJmSourceRootDirOffset);
 
-    test_cpu_fences();
+    //test_cpu_fences();
 
     jmlog::finalize();
     return 0;

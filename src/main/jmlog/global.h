@@ -66,6 +66,7 @@ bool init(const BasicConfigFile<CharTy> & config)
 {
     BasicConfigFile<CharTy> & global_config = getGlobalConfig<CharTy>();
     global_config.copyConfig(config);
+    printf("__FILE__ = %s\n\n", __FILE__);
     kJmSourceRootDirOffset = jmGetSourceRootDirOffset(__FILE__, "/src/main/jmlog/global.h");
     return true;
 }
