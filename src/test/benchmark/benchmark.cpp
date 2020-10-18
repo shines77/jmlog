@@ -76,7 +76,7 @@ void test_cpu_fences()
 
 #if defined(_MSC_VER)
     start = rdtsc();
-    for (unsigned __int64 i = 0; i < loops; i++) {
+    for (size_t i = 0; i < loops; i++) {
         *x = 0;
         __faststorefence();
     }
@@ -88,7 +88,7 @@ void test_cpu_fences()
     std::cout << std::endl;
 #else
     start = rdtsc();
-    for (unsigned __int64 i = 0; i < loops; i++) {
+    for (size_t i = 0; i < loops; i++) {
         *x = 0;
         __sync_synchronize();
     }
