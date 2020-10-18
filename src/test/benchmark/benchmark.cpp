@@ -144,7 +144,7 @@ int main(int argc, char * argv[])
     jmlog_info(log, "value = %d, %s\n\n", 1726187, "232");
 
     log.info("__FILE__ = %s\n\n", __FILE__);
-#if defined(__GUNC__)
+#if defined(__GNUC__)
     log.info("__BASE_FILE__ = %s\n\n", __BASE_FILE__);
 #endif
     log.info("__FUNCTION__ = %s()\n\n", __FUNCTION__);
