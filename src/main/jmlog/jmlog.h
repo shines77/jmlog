@@ -11,6 +11,7 @@
 #endif
 
 #include "jmlog/logger.h"
+#include "jmlog/rdtsc.h"
 
 namespace jmlog {
 

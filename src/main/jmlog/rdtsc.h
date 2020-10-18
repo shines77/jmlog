@@ -22,8 +22,8 @@
 //
 // std::atomic_thread_fence() : lfence, sfence, mefence
 //
-// https://en.cppreference.com/w/cpp/atomic/atomic_thread_fence
 // https://blog.csdn.net/wxj1992/article/details/103917093
+// https://en.cppreference.com/w/cpp/atomic/atomic_thread_fence
 //
 
 //
@@ -69,11 +69,23 @@
  && (defined(_M_IX86) || defined(_M_AMD64) || defined(_M_X64))
 #  include <intrin.h>
 #  pragma intrinsic(__rdtsc)
+#  pragma intrinsic(__rdtscp)
+
+#  pragma intrinsic(_mm_lfence)
+#  pragma intrinsic(_mm_mfence)
+#  pragma intrinsic(_mm_sfence)
+
+#include <emmintrin.h>      // For _mm_mfence(), _mm_lfence()
+#include <xmmintrin.h >     // For _mm_sfence()
+
 #endif // _MSC_VER && _M_IX86
 
 #if (defined(__GNUC__) || defined(__ICC) || defined(__clang__)) \
  && (defined(__i386__) || defined(__x86_64__) || defined(__amd64__))
 #  include <intrin.h>
+
+#include <emmintrin.h>      // For _mm_mfence(), _mm_lfence()
+#include <xmmintrin.h >     // For _mm_sfence()
 #endif // __GNUC__ && __i386__
 
 namespace jmlog {
@@ -129,6 +141,16 @@ static inline uint64_t rdtsc()
     return tsc;
 }
 
+static inline uint64_t rdtscp()
+{
+    std::atomic_signal_fence(std::memory_order_seq_cst);
+    unsigned int ui;
+    uint64_t tsc = __rdtscp(&ui);
+    (void)ui;
+    std::atomic_signal_fence(std::memory_order_seq_cst);
+    return tsc;
+}
+
 #endif // _MSC_VER && _M_IX86
 
 #if (defined(__GNUC__) || defined(__ICC) || defined(__clang__)) \
@@ -141,6 +163,16 @@ static inline uint64_t rdtsc()
 {
     std::atomic_signal_fence(std::memory_order_seq_cst);
     uint64_t tsc = __builtin_ia32_rdtsc();
+    std::atomic_signal_fence(std::memory_order_seq_cst);
+    return tsc;
+}
+
+static inline uint64_t rdtsc()
+{
+    std::atomic_signal_fence(std::memory_order_seq_cst);
+    unsigned int ui;
+    uint64_t tsc = __builtin_ia32_rdtscp(&ui);
+    (void)ui;
     std::atomic_signal_fence(std::memory_order_seq_cst);
     return tsc;
 }
@@ -219,13 +251,19 @@ static inline uint64_t armv8pmu_pmcr_rdtsc(void)
 
 #endif // __GNUC__ && __arm__
 
+#if defined(_MSC_VER) && defined(_M_ARM) || defined(_M_ARM64) && !defined(JM_HAVE_RDTSC)
+
+// TODO: rdtsc()
+
+#endif // _MSC_VER && _M_ARM
+
 } // namespace jmlog
 
 #if !defined(JM_HAVE_RDTSC)
 
 #if (defined(__GNUC__) || defined(__ICL__) || defined(__GNUC__)) && defined(__linux__))
 
-#include <time.h>
+#include <time.h>   // For clock_gettime()
 
 namespace jmlog {
 
@@ -233,6 +271,8 @@ static inline uint64_t rdtsc()
 {
     struct timespec ts;
     std::atomic_signal_fence(std::memory_order_seq_cst);
+    // clock_gettime() is implemented in librt, so need add -lrt compile option.
+    // clock_gettime() is define in <time.h>.
     ::clock_gettime(CLOCK_MONOTONIC, &ts);
     std::atomic_signal_fence(std::memory_order_seq_cst);
     return (ts.tv_sec * 1000000000ULL + ts.tv_nsec);
@@ -255,5 +295,84 @@ static inline uint64_t rdtsc()
 #endif // __linux__
 
 #endif // JM_HAVE_RDTSC
+
+//
+// rdtsc + fence
+//
+
+namespace jmlog {
+
+//
+// std::atomic_thread_fence() & CPU: lfence, sfence, mfence
+// https://blog.csdn.net/wxj1992/article/details/103917093
+// https://blog.csdn.net/liuhhaiffeng/article/details/106493224 (more cleanly than above acticle)
+// https://en.cppreference.com/w/cpp/atomic/atomic_thread_fence
+//
+
+//
+// Does it make any sense to use the LFENCE instruction on x86/x86_64 processors?
+// https://stackoverflow.com/questions/20316124/does-it-make-any-sense-to-use-the-lfence-instruction-on-x86-x86-64-processors
+//
+
+//
+// Why is (or isn't?) SFENCE + LFENCE equivalent to MFENCE?
+// https://stackoverflow.com/questions/27627969/why-is-or-isnt-sfence-lfence-equivalent-to-mfence
+//
+// SFENCE + LFENCE doesn't block StoreLoad reordering, so it's not sufficient for sequential consistency.
+// Only mfence (or a locked operation, or a real serializing instruction like cpuid) will do that.
+//
+
+//
+// _mm_sfence vs __faststorefence
+// https://stackoverflow.com/questions/12308916/mm-sfence-vs-faststorefence
+//
+// __faststorefence() is generate code: LOCK OR DWORD PTR [rsp], ebp, and ebp is 0 use xor ebp inst.
+//
+
+static inline uint64_t fence_rdtsc()
+{
+    std::atomic_signal_fence(std::memory_order_seq_cst);
+    // CPU: lfence
+    std::atomic_thread_fence(std::memory_order_acquire);
+    uint64_t tsc = rdtsc();
+    std::atomic_signal_fence(std::memory_order_seq_cst);
+    return tsc;
+}
+
+static inline uint64_t fence_rdtsc_fence()
+{
+    std::atomic_signal_fence(std::memory_order_seq_cst);
+    // CPU: lfence
+    std::atomic_thread_fence(std::memory_order_acquire);
+    uint64_t tsc = rdtsc();
+    // CPU: lfence
+    std::atomic_thread_fence(std::memory_order_acquire);
+    std::atomic_signal_fence(std::memory_order_seq_cst);
+    return tsc;
+}
+
+static inline uint64_t mfence_rdtsc()
+{
+    std::atomic_signal_fence(std::memory_order_seq_cst);
+    // CPU: full-fence, is mfence or atomic operation
+    std::atomic_thread_fence(std::memory_order_seq_cst);
+    uint64_t tsc = rdtsc();
+    std::atomic_signal_fence(std::memory_order_seq_cst);
+    return tsc;
+}
+
+static inline uint64_t mfence_rdtsc_mfence()
+{
+    std::atomic_signal_fence(std::memory_order_seq_cst);
+    // CPU: full-fence, is mfence or atomic operation
+    std::atomic_thread_fence(std::memory_order_seq_cst);
+    uint64_t tsc = rdtsc();
+    // CPU: full-fence, is mfence or atomic operation
+    std::atomic_thread_fence(std::memory_order_seq_cst);
+    std::atomic_signal_fence(std::memory_order_acq_rel);
+    return tsc;
+}
+
+} // namespace jmlog
 
 #endif // JMLOG_RDTSC_H

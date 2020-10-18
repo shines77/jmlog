@@ -7,7 +7,16 @@
 #pragma warning(disable: 4467)
 #endif
 
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
+#include <cstdlib>
+#include <cstdio>
+#include <iostream>
+
 #include <jmlog/jmlog.h>
+#include <jmlog/rdtsc.h>
 
 using namespace jmlog;
 
@@ -22,6 +31,75 @@ using namespace jmlog;
 #define BENCHMARK_CONF_FILE fs::Path("./benchmark-log.conf")
 #define BENCHMARK_LOG_FILE  fs::Path("./benchmark-log.dat")
 #define BENCHMARK_LOG_DIR   fs::Path("./benchmark-log")
+
+void test_cpu_fences()
+{
+    size_t * x = new size_t;
+    static const size_t loops = 100000000; // 1 billion
+    uint64_t start, elapsed;
+
+    start = rdtsc();
+    for (size_t i = 0; i < loops; i++) {
+        *x = 0;
+        _mm_lfence();
+    }
+    elapsed = rdtsc() - start;
+
+    std::cout << "_mm_lfence       : " << elapsed << std::endl
+              << "average          : " << double(elapsed) / double(loops) << " cycles " << std::endl;
+
+    std::cout << std::endl;
+
+    start = rdtsc();
+    for (size_t i = 0; i < loops; i++) {
+        *x = 0;
+        _mm_sfence();
+    }
+    elapsed = rdtsc() - start;
+
+    std::cout << "_mm_sfence       : " << elapsed << std::endl
+              << "average          : " << double(elapsed) / double(loops) << " cycles " << std::endl;
+
+    std::cout << std::endl;
+
+    start = rdtsc();
+    for (size_t i = 0; i < loops; i++) {
+        *x = 0;
+        _mm_mfence();
+    }
+    elapsed = rdtsc() - start;
+
+    std::cout << "_mm_mfence       : " << elapsed << std::endl
+              << "average          : " << (double(elapsed) / double(loops)) << " cycles " << std::endl;
+
+    std::cout << std::endl;
+
+#if defined(_MSC_VER)
+    start = rdtsc();
+    for (unsigned __int64 i = 0; i < loops; i++) {
+        *x = 0;
+        __faststorefence();
+    }
+    elapsed = rdtsc() - start;
+
+    std::cout << "__faststorefence : " << elapsed << std::endl
+              << "average          : " << (double(elapsed) / double(loops)) << " cycles " << std::endl;
+
+    std::cout << std::endl;
+#else
+    start = rdtsc();
+    for (unsigned __int64 i = 0; i < loops; i++) {
+        *x = 0;
+        __sync_synchronize();
+    }
+    elapsed = rdtsc() - start;
+
+    std::cout << "__sync_synchronize : " << elapsed << std::endl
+              << "average            : " << (double(elapsed) / double(loops)) << " cycles " << std::endl;
+
+    std::cout << std::endl;
+#endif
+}
 
 int setting_conf_file(ConfigFile & config)
 {
@@ -44,6 +122,8 @@ int main(int argc, char * argv[])
                                   "value = %d, %s\n\n", jm_i32, jm_string);
     log.info(pattern, "value = %d, %s\n\n", 1726187, "str");
     jmlog_info(log, "value = %d, %s\n\n", 1726187, "232");
+
+    test_cpu_fences();
 
     jmlog::finalize();
     return 0;
