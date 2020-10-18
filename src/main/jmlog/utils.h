@@ -40,6 +40,55 @@ const wchar_t * string_fmt(const wchar_t * p = nullptr)
     return L"[%s] ";
 }
 
+/*********************************************************************************/
+
+//
+// C++ 11
+// Msvc 2015 update 3, gcc 5.4, clang 3.8.0
+//
+// __FILE__ macro shows full path
+// See: https://stackoverflow.com/questions/8487986/file-macro-shows-full-path
+//
+template <typename T, std::size_t S>
+inline
+constexpr std::size_t getSourceFileNameOffset(const T (& str)[S], std::size_t i = S - 1)
+{
+    return (str[i] == '/' || str[i] == '\\') ? (i + 1) : ((i > 0) ? getSourceFileNameOffset(str, i - 1) : 0);
+}
+
+template <typename T>
+inline
+constexpr std::size_t getSourceFileNameOffset(T (& str)[1])
+{
+    return 0;
+}
+
+/*********************************************************************************/
+
+//
+// C++ 11
+//
+// How to extract the source filename without path and suffix at compile time?
+// https://stackoverflow.com/questions/31050113/how-to-extract-the-source-filename-without-path-and-suffix-at-compile-time
+//
+constexpr const char * str_end(const char * str) {
+    return ((*str) ? str_end(str + 1) : str);
+}
+
+constexpr bool str_slant(const char * str) {
+    return (*str == '/' || *str == '\\') ? true : ((*str) ? str_slant(str + 1) : false);
+}
+
+constexpr const char * r_slant(const char * str) {
+    return (*str == '/' || *str == '\\') ? (str + 1) : r_slant(str - 1);
+}
+
+constexpr const char * getSourceFileNameOffset_cxx11(const char* str) {
+    return str_slant(str) ? r_slant(str_end(str)) : str;
+}
+
+/*********************************************************************************/
+
 char pathCharToUpper(char c)
 {
     if (c >= 'A') {
