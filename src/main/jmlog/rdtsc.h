@@ -167,7 +167,7 @@ static inline uint64_t rdtsc()
     return tsc;
 }
 
-static inline uint64_t rdtsc()
+static inline uint64_t rdtscp()
 {
     std::atomic_signal_fence(std::memory_order_seq_cst);
     unsigned int ui;
