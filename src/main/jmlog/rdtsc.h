@@ -82,7 +82,7 @@
 
 #if (defined(__GNUC__) || defined(__ICC) || defined(__clang__)) \
  && (defined(__i386__) || defined(__x86_64__) || defined(__amd64__))
-#  include <intrin.h>
+#  include <x86intrin.h>
 
 #include <emmintrin.h>      // For _mm_mfence(), _mm_lfence()
 #include <xmmintrin.h >     // For _mm_sfence()
