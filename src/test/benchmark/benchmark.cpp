@@ -15,11 +15,14 @@
 #include <cstdio>
 #include <iostream>
 
+#include <inttypes.h>
+
 #include <jmlog/jmlog.h>
 #include <jmlog/rdtsc.h>
 
 using namespace jmlog;
 
+#ifdef IMPORT_ORIGINAL_LIB
 #if defined(_MSC_VER)
 #ifdef NDEBUG
 #pragma comment(lib, "jmlog-Release.lib")
@@ -27,6 +30,7 @@ using namespace jmlog;
 #pragma comment(lib, "jmlog-Debug.lib")
 #endif
 #endif
+#endif // IMPORT_ORIGINAL_LIB
 
 #define BENCHMARK_CONF_FILE fs::Path("./benchmark-log.conf")
 #define BENCHMARK_LOG_FILE  fs::Path("./benchmark-log.dat")
@@ -74,7 +78,7 @@ void test_cpu_fences()
 
     std::cout << std::endl;
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && (defined(_M_AMD64) || defined(_M_X64))
     start = rdtsc();
     for (size_t i = 0; i < loops; i++) {
         *x = 0;
@@ -86,7 +90,7 @@ void test_cpu_fences()
               << "average          : " << (double(elapsed) / double(loops)) << " cycles " << std::endl;
 
     std::cout << std::endl;
-#else
+#elif defined(__GNUC__)
     start = rdtsc();
     for (size_t i = 0; i < loops; i++) {
         *x = 0;
@@ -122,6 +126,9 @@ int main(int argc, char * argv[])
                                   "value = %d, %s\n\n", jm_i32, jm_string);
     log.info(pattern, "value = %d, %s\n\n", 1726187, "str");
     jmlog_info(log, "value = %d, %s\n\n", 1726187, "232");
+
+    log.info("__FILE__ = %s\n\n", __FILE__);
+    jmlog_info(log, "kSourceRootDirOffset = %" PRIuPTR "\n\n", kJmSourceRootDirOffset);
 
     test_cpu_fences();
 

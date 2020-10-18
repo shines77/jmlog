@@ -22,24 +22,24 @@
 
 #define jmlog_write_log(logger, level, pattern, fmt, ...) \
     do { \
-        int tmp = MSVC_PRINTF_CHECK(fmt, __VA_ARGS__);  \
-        logger.log(level, fmt, __VA_ARGS__);             \
+        int tmp = MSVC_PRINTF_CHECK(fmt, ##__VA_ARGS__);    \
+        logger.log(level, fmt, ##__VA_ARGS__);              \
     } while (0)
 
 #define jmlog_info(log, fmt, ...) \
     do { \
-        int tmp = MSVC_PRINTF_CHECK(fmt, __VA_ARGS__);  \
-        log.info(fmt, __VA_ARGS__);                     \
+        int tmp = MSVC_PRINTF_CHECK(fmt, ##__VA_ARGS__);  \
+        log.info(fmt, ##__VA_ARGS__);                     \
     } while (0)
 
 #define jmRegisterPattern(log, pattern, fmt, ...) \
     do { \
-        int tmp = MSVC_PRINTF_CHECK(fmt, __VA_ARGS__);      \
+        int tmp = MSVC_PRINTF_CHECK(fmt, ##__VA_ARGS__);    \
         int pattern_id = jmlog::ptr2int(fmt);               \
     } while (0);                                            \
                                                             \
     const jmlog::Pattern & pattern = log.registerPattern(   \
-    __FILE__, std::size_t(__LINE__), fmt, __VA_ARGS__)
+    __FILE__, std::size_t(__LINE__), fmt, ##__VA_ARGS__)
 
 namespace jmlog {
 
@@ -57,7 +57,7 @@ private:
     string_type         filename_;
 
 public:
-    BasicPattern(const char_type * fmt) : fmt_(fmt), line_num_(-1), format_(fmt) {
+    explicit BasicPattern(const char_type * fmt) : fmt_(fmt), line_num_(-1), format_(fmt) {
     }
     BasicPattern(const char_type * fmt,
                  std::size_t line_num,

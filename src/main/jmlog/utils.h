@@ -40,6 +40,66 @@ const wchar_t * string_fmt(const wchar_t * p = nullptr)
     return L"[%s] ";
 }
 
+char pathCharToUpper(char c)
+{
+    if (c >= 'A') {
+        unsigned char uc = (unsigned char)c;
+        uc &= (~(unsigned char)0x40);
+        return (char)uc;
+    }
+    else {
+        return c;
+    }
+}
+
+std::size_t getSourceRootDirOffset(const char * source_filename, const std::size_t len_source,
+                                   const char * relative_filename, const std::size_t len_relative)
+{
+    if (len_source == 0 || len_relative == 0) {
+        return std::size_t(-1);
+    }
+
+    std::ptrdiff_t pos = -1;
+    if (len_source >= len_relative) {
+        const char * source = source_filename + len_source - 1;
+        const char * relative = relative_filename + len_relative - 1;
+        while (relative > relative_filename) {
+            if (pathCharToUpper(*relative) == pathCharToUpper(*source)) {
+                relative--;
+                source--;
+            }
+            else if (*relative == '\\' || *relative == '/') {
+                if (*source == '\\' || *source == '/') {
+                    relative--;
+                    source--;
+                }
+                else {
+                    break;
+                }
+            }
+            else {
+                break;
+            }
+        }
+
+        pos = source - source_filename;
+    }
+    else {
+        for (std::ptrdiff_t i = std::ptrdiff_t(len_source - 1); i >= 0; i--) {
+            char ch = source_filename[i];
+            if (ch == '\\' || ch == '/') {
+                pos = i;
+                break;
+            }
+        }
+        if (pos == -1) {
+            pos = len_source;
+        }
+    }
+
+    return std::size_t(pos);
+}
+
 } // namespace jmlog
 
 #endif // JMLOG_UTILS_H

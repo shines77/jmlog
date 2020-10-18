@@ -22,6 +22,10 @@
 #include "jmlog/utils.h"
 #include "jmlog/config.h"
 
+#define jmGetSourceRootDirOffset(source_filename, relative_filename) \
+    jmlog::getSourceRootDirOffset(source_filename, sizeof(source_filename), \
+                                  relative_filename, sizeof(relative_filename))
+
 static int32_t jm_i32 = 32;
 static int64_t jm_i64 = 64;
 static uint32_t jm_u32 = 32;
@@ -33,6 +37,8 @@ namespace jmlog {
 
 static ConfigFile  jmlog_config;
 static WConfigFile jmlog_wconfig;
+
+static std::size_t kJmSourceRootDirOffset = -1;
 
 template <typename CharTy>
 static
@@ -58,7 +64,9 @@ template <typename CharTy>
 static
 bool init(const BasicConfigFile<CharTy> & config)
 {
-    getGlobalConfig<CharTy>() = config;
+    BasicConfigFile<CharTy> & global_config = getGlobalConfig<CharTy>();
+    global_config.copyConfig(config);
+    kJmSourceRootDirOffset = jmGetSourceRootDirOffset(__FILE__, "/src/main/jmlog/global.h");
     return true;
 }
 

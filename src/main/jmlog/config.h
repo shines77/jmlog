@@ -70,8 +70,9 @@ public:
     typedef CharTy                          char_type;
     typedef std::basic_string<char_type>    string_type;
     typedef fs::BasicPath<char_type>        path_type;
+    typedef BasicConfigFile<char_type>      this_type;
 
-private:
+protected:
     string_type filename_;
     string_type root_dir_;
     string_type content_;
@@ -116,7 +117,7 @@ public:
                         ifs.read(buf, kBufSize);
                         std::streamsize read_bytes = ifs.gcount();
                         if (read_bytes > 0) {
-                            std::memcpy(data, buf, read_bytes);
+                            std::memcpy(data, buf, (std::size_t)read_bytes);
                             data += read_bytes;
                             file_size -= read_bytes;
                         }
@@ -163,6 +164,13 @@ public:
         }
 
         return result;
+    }
+
+    int copyConfig(const this_type & config) {
+        this->filename_ = config.filename_;
+        this->root_dir_ = config.root_dir_;
+        this->content_  = config.content_;
+        return 0;
     }
 };
 
