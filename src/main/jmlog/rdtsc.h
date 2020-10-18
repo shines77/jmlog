@@ -76,7 +76,7 @@
 #  pragma intrinsic(_mm_sfence)
 
 #include <emmintrin.h>      // For _mm_mfence(), _mm_lfence()
-#include <xmmintrin.h >     // For _mm_sfence()
+#include <xmmintrin.h>     // For _mm_sfence()
 
 #endif // _MSC_VER && _M_IX86
 
@@ -85,7 +85,7 @@
 #  include <x86intrin.h>
 
 #include <emmintrin.h>      // For _mm_mfence(), _mm_lfence()
-#include <xmmintrin.h >     // For _mm_sfence()
+#include <xmmintrin.h>     // For _mm_sfence()
 #endif // __GNUC__ && __i386__
 
 namespace jmlog {
