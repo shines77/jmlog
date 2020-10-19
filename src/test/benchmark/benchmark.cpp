@@ -150,16 +150,19 @@ int main(int argc, char * argv[])
     log.info("__FUNCTION__ = %s()\n\n", __FUNCTION__);
     jmlog_info(log, "kSourceRootDirOffset = %" PRIuPTR "\n\n", kJmSourceRootDirOffset);
 
+    const char * filename_cxx14_1 = cxx14::v1::getSourceFileName(__FILE__, "/src/", false);
+    log.info("cxx14::v1::getSourceFileName() = %s\n\n", filename_cxx14_1);
+
     //
     // gcc: at least gcc 6.1 + -O1
     // msvc: put result into constexpr variable
     // clang: persists on not compile time evaluation
     //
-    constexpr auto filename = &__FILE__[getSourceFileNameOffset(__FILE__)];
-    log.info("getSourceFileName() = %s\n\n", filename);
+    constexpr const char * filename_cxx11_1 = &__FILE__[getSourceFileNameOffset(__FILE__)];
+    log.info("getSourceFileName_cxx11_1() = %s\n\n", filename_cxx11_1);
 
-    constexpr auto filename_cxx11 = getSourceFileNameOffset_cxx11(__FILE__);
-    log.info("getSourceFileName()_cxx11 = %s\n\n", filename_cxx11);
+    constexpr const char * filename_cxx11_2 = getSourceFileName_cxx11(__FILE__);
+    log.info("getSourceFileName_cxx11_2() = %s\n\n", filename_cxx11_2);
 
     //test_cpu_fences();
 

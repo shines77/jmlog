@@ -49,9 +49,9 @@ const wchar_t * string_fmt(const wchar_t * p = nullptr)
 // __FILE__ macro shows full path
 // See: https://stackoverflow.com/questions/8487986/file-macro-shows-full-path
 //
-template <typename T, std::size_t S>
+template <typename T, std::size_t Size>
 inline
-constexpr std::size_t getSourceFileNameOffset(const T (& str)[S], std::size_t i = S - 1)
+constexpr std::size_t getSourceFileNameOffset(const T (& str)[Size], std::size_t i = Size - 1)
 {
     return (str[i] == '/' || str[i] == '\\') ? (i + 1) : ((i > 0) ? getSourceFileNameOffset(str, i - 1) : 0);
 }
@@ -79,13 +79,165 @@ constexpr bool str_slant(const char * str) {
     return (*str == '/' || *str == '\\') ? true : ((*str) ? str_slant(str + 1) : false);
 }
 
-constexpr const char * r_slant(const char * str) {
-    return (*str == '/' || *str == '\\') ? (str + 1) : r_slant(str - 1);
+constexpr const char * reverse_slant(const char * str) {
+    return (*str == '/' || *str == '\\') ? (str + 1) : reverse_slant(str - 1);
 }
 
-constexpr const char * getSourceFileNameOffset_cxx11(const char* str) {
-    return str_slant(str) ? r_slant(str_end(str)) : str;
+constexpr const char * getSourceFileName_cxx11_original(const char * str) {
+    return str_slant(str) ? reverse_slant(str_end(str)) : str;
 }
+
+/*********************************************************************************/
+
+//
+// C++ 11
+//
+// How to extract the source filename without path and suffix at compile time?
+// https://stackoverflow.com/questions/31050113/how-to-extract-the-source-filename-without-path-and-suffix-at-compile-time
+//
+constexpr bool is_null_terminator(char c) {
+    return (c == '\0');
+}
+
+constexpr bool is_not_null_terminator(char c) {
+    return (c != '\0');
+}
+
+constexpr bool is_path_separator(char c) {
+    return (c == '/' || c == '\\');
+}
+
+constexpr const char * find_str_end(const char * str) {
+    return (is_not_null_terminator(*str) ? find_str_end(str + 1) : str);
+}
+
+constexpr bool find_first_of_separator(const char * str) {
+    return (is_path_separator(*str) ? true : (is_not_null_terminator(*str) ? find_first_of_separator(str + 1) : false));
+}
+
+constexpr const char * reverse_find_first_of_separator(const char * str) {
+    return (is_path_separator(*str) ? (str + 1) : reverse_find_first_of_separator(str - 1));
+}
+
+constexpr const char * getSourceFileName_cxx11(const char * str) {
+    return (find_first_of_separator(str) ? reverse_find_first_of_separator(find_str_end(str)) : str);
+}
+
+/*********************************************************************************/
+
+namespace cxx14 {
+namespace v1 {
+
+//
+// C++ 14
+//
+char pathCharToUpper(char c)
+{
+    if (c == '\\')
+        return '/';
+    else
+        return ((c >= 'a' && c <= 'z') ? (c - 0x20) : c);
+}
+
+bool isPathSeparator(char c)
+{
+    return (c == '/' || c == '\\');
+}
+
+bool lastCharIsPathSeparator(const char * first, const char * last)
+{
+    ptrdiff_t size = last - first;
+    if (size > 0) {
+        const char * tail = last - 1;
+        return isPathSeparator(*tail);
+    }
+    return false;
+}
+
+const char * getSourceFileName(const char * source_path,
+                               const char * source_prefix,
+                               bool include_prefix)
+{
+    const char * filename = source_path;
+    const char * path = source_path;
+    while (*path != '\0') {
+        const char * target = source_prefix;
+        // Find first char equal target
+        do {
+            if (pathCharToUpper(*path) != pathCharToUpper(*target))
+                path++;
+            else
+                break;
+        } while (*path != '\0');
+        const char * start_pos = path;
+        do {
+            if (pathCharToUpper(*path) != pathCharToUpper(*target)) {
+                if (*target != '\0') {
+                    path++;
+                    break;
+                }
+                else {
+                    // Target reach the end of and path is not a null terminator.
+                    if (target <= source_prefix) {
+                        return source_path;
+                    }
+                    bool lastTargetIsSep = lastCharIsPathSeparator(source_prefix, target);
+                    bool curPathIsSep = isPathSeparator(*path);
+                    if ((lastTargetIsSep && !curPathIsSep) ||
+                        (!lastTargetIsSep && curPathIsSep)) {
+                        if (include_prefix) {
+                            filename = path - (target - source_prefix);
+                        }
+                        else {
+                            bool lastPathIsSep = lastCharIsPathSeparator(source_path, path);
+                            if (lastTargetIsSep && lastPathIsSep)
+                                filename = path - 1;
+                            else
+                                filename = path;
+                        }
+                    }
+                    // In fact, start_pos = path - (target - source_prefix)
+                    path = start_pos + 1;
+                    break;
+                }
+            }
+            else {
+                if (*target != '\0') {
+                    path++;
+                    target++;
+                }
+                else {
+                    // Target reach the end of and both path and target is null terminator.
+                    if (target <= source_prefix) {
+                        return source_path;
+                    }
+                    bool lastTargetIsSep = lastCharIsPathSeparator(source_prefix, target);
+                    bool curPathIsSep = isPathSeparator(*path);
+                    if ((lastTargetIsSep && !curPathIsSep) ||
+                        (!lastTargetIsSep && curPathIsSep)) {
+                        if (include_prefix) {
+                            filename = path - (target - source_prefix);
+                        }
+                        else {
+                            bool lastPathIsSep = lastCharIsPathSeparator(source_path, path);
+                            if (lastTargetIsSep && lastPathIsSep)
+                                filename = path - 1;
+                            else
+                                filename = path;
+                        }
+                    }
+                    // In fact, start_pos = path - (target - source_prefix)
+                    path = start_pos + 1;
+                    break;
+                }
+            }
+        } while (1);
+    }
+    return filename;
+}
+
+} // namespace v1
+} // namespace cxx14
 
 /*********************************************************************************/
 
