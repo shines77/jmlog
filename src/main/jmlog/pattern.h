@@ -22,23 +22,23 @@
 
 #define jmlog_write_log(logger, level, pattern, fmt, ...) \
     do { \
-        int tmp = MSVC_PRINTF_CHECK(fmt, ##__VA_ARGS__);    \
-        logger.log(level, fmt, ##__VA_ARGS__);              \
+        int tmp = JMLOG_CHECK_PRINTF_FORMAT(fmt, ##__VA_ARGS__);    \
+        logger.log(level, fmt, ##__VA_ARGS__);                      \
     } while (0)
 
 #define jmlog_info(log, fmt, ...) \
     do { \
-        int tmp = MSVC_PRINTF_CHECK(fmt, ##__VA_ARGS__);  \
-        log.info(fmt, ##__VA_ARGS__);                     \
+        int tmp = JMLOG_CHECK_PRINTF_FORMAT(fmt, ##__VA_ARGS__);    \
+        log.info(fmt, ##__VA_ARGS__);                               \
     } while (0)
 
 #define jmRegisterPattern(log, pattern, fmt, ...) \
     do { \
-        int tmp = MSVC_PRINTF_CHECK(fmt, ##__VA_ARGS__);    \
-        int pattern_id = jmlog::ptr2int(fmt);               \
-    } while (0);                                            \
-                                                            \
-    const jmlog::Pattern & pattern = log.registerPattern(   \
+        int tmp = JMLOG_CHECK_PRINTF_FORMAT(fmt, ##__VA_ARGS__);    \
+        int pattern_id = jmlog::ptr2int(fmt);                       \
+    } while (0);                                                    \
+                                                                    \
+    const jmlog::Pattern & pattern = log.registerPattern(           \
     __FILE__, std::size_t(__LINE__), fmt, ##__VA_ARGS__)
 
 namespace jmlog {

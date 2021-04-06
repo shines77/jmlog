@@ -63,7 +63,7 @@ public:
     //    return ::printf(pattern.getFormat().c_str(), std::forward<Args>(args)...);
     //}
 
-    int print(const pattern_type * pattern, MSVC_FORMAT_STRING(const char_type * fmt), ...) {
+    int print(const pattern_type * pattern, JMLOG_MSVC_FORMAT_STRING const char_type * fmt, ...) {
         va_list arg_list;
         va_start(arg_list, fmt);
         int result = ::vprintf(pattern->getFormat().c_str(), arg_list);

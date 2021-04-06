@@ -20,7 +20,7 @@
 #define JMLOG_WCHAR(x)      __WCHAR(x)
 #endif
 
-#define ENABLE_MSVC_PRINTF_CHECK    1
+#define JMLOG_ENABLE_CHECK_PRINTF_FORMAT    1
 
 //
 // __attribute__((format(printf, 1, 2))) for MSVC?
@@ -30,35 +30,51 @@
 // See: https://docs.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-2010/ms235402(v=vs.100)?redirectedfrom=MSDN
 //
 
-/* use /analyze or _USE_ATTRIBUTES_FOR_SAL = 1 for checking */
+/* NOTE: use /analyze or _USE_ATTRIBUTES_FOR_SAL = 1 for checking */
 
-#ifndef MSVC_FORMAT_STRING
+#ifndef JMLOG_MSVC_FORMAT_STRING
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
 # include <sal.h>
 # if (_MSC_VER > 1400)
-#  define MSVC_FORMAT_STRING(p)     _Printf_format_string_ p
+#  define JMLOG_MSVC_FORMAT_STRING    _Printf_format_string_
 # else
-#  define MSVC_FORMAT_STRING(p)     __format_string p
+#  define JMLOG_MSVC_FORMAT_STRING    __format_string
 # endif
 #else
-# define MSVC_FORMAT_STRING(p)      p
+# define JMLOG_MSVC_FORMAT_STRING
 #endif // _MSC_VER
-#endif // MSVC_FORMAT_STRING
+#endif // JMLOG_MSVC_FORMAT_STRING
 
+#ifndef JMLOG_GCC_CHECK_PRINTF_FORMAT
 #if (defined(__GUNC__) || defined(__clang__)) && defined(__attribute__)
   //
   // GCC C-FLAGS: -Wformat is enable
   // arche_type: printf, scanf.
   //
-# define JMLOG_FORMAT_ATTR(arche_type, fmt_index, args_index) \
-        __attribute__((format(arche_type, (fmt_index), (args_index))));
+  // __attribute__((format(arche-type, string-index, first-to-check)))
+  //
+  // See: https://blog.csdn.net/huangjh2017/article/details/76944564
+  //
+  // void Trace(const char * fmt, ...) __attribute__((format(printf, 1, 2)));
+  //
+  // void Trace(const char * fmt, ...)
+  // {
+  //    va_list ap;
+  //    va_start(ap, fmt);
+  //    (void)printf(fmt, ap);
+  //    va_end(ap);
+  // }
+  //
+# define JMLOG_GCC_CHECK_PRINTF_FORMAT(fmt_string_index, first_to_check_args_index) \
+         __attribute__((format(printf, (fmt_string_index), (first_to_check_args_index))));
 #else
-# define JMLOG_FORMAT_ATTR(arche_type, fmt_index, args_index)
+# define JMLOG_GCC_CHECK_PRINTF_FORMAT(fmt_string_index, first_to_check_args_index)
 #endif
+#endif // JMLOG_GCC_CHECK_PRINTF_FORMAT
 
-#if ENABLE_MSVC_PRINTF_CHECK
-# ifndef MSVC_PRINTF_CHECK
-#  define MSVC_PRINTF_CHECK(...)   (0 && ::snprintf(nullptr, 0, ##__VA_ARGS__))
+#if JMLOG_ENABLE_CHECK_PRINTF_FORMAT
+# ifndef JMLOG_CHECK_PRINTF_FORMAT
+#  define JMLOG_CHECK_PRINTF_FORMAT(...)   (0 && ::snprintf(nullptr, 0, ##__VA_ARGS__))
 #  if defined(__cplusplus)
     // in C++ we can allow macros that optionally take a format parameter, typical of macros that
     // translate an empty format into a newline or such.
@@ -66,9 +82,7 @@
         return 0;
     }
 #  endif
-# else
-#  define MSVC_PRINTF_CHECK(...)    ((void)(0))
-# endif // MSVC_PRINTF_CHECK
-#endif // ENABLE_MSVC_PRINTF_CHECK
+# endif // JMLOG_CHECK_PRINTF_FORMAT
+#endif // JMLOG_ENABLE_CHECK_PRINTF_FORMAT
 
 #endif // JMLOG_COMMON_H

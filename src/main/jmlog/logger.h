@@ -70,8 +70,8 @@ public:
     }
 
     const pattern_type & registerPattern(const char_type * filename, std::size_t line_num, 
-                                         MSVC_FORMAT_STRING(const char_type * fmt), ...)
-                                         JMLOG_FORMAT_ATTR(printf, 3, 4) {
+                                         JMLOG_MSVC_FORMAT_STRING const char_type * fmt, ...)
+                                         JMLOG_GCC_CHECK_PRINTF_FORMAT(4, 5) {
         typedef typename pattern_map_t::const_iterator  const_iterator;
         const_iterator iter = this->pattern_map_.find(fmt);
         if (iter != this->pattern_map_.end()) {
@@ -90,8 +90,8 @@ public:
         }
     }
 
-    void log(Level level, MSVC_FORMAT_STRING(const char_type * fmt), ...) 
-         JMLOG_FORMAT_ATTR(printf, 2, 3) {
+    void log(Level level, JMLOG_MSVC_FORMAT_STRING const char_type * fmt, ...) 
+         JMLOG_GCC_CHECK_PRINTF_FORMAT(2, 3) {
         if (this->getLevel() >= level) {
             va_list arg_list;
             va_start(arg_list, fmt);
@@ -100,7 +100,7 @@ public:
         }
     }
 
-    void trace(MSVC_FORMAT_STRING(const char_type * fmt), ...) {
+    void trace(JMLOG_MSVC_FORMAT_STRING const char_type * fmt, ...) {
         if (this->getLevel() >= Level::Trace) {
             va_list arg_list;
             va_start(arg_list, fmt);
@@ -109,7 +109,7 @@ public:
         }
     }
 
-    void debug(MSVC_FORMAT_STRING(const char_type * fmt), ...) {
+    void debug(JMLOG_MSVC_FORMAT_STRING const char_type * fmt, ...) {
         if (this->getLevel() >= Level::Debug) {
             va_list arg_list;
             va_start(arg_list, fmt);
@@ -118,8 +118,8 @@ public:
         }
     }
 
-    void warn(MSVC_FORMAT_STRING(const char_type * fmt), ...)
-        JMLOG_FORMAT_ATTR(printf, 1, 2) {
+    void warn(JMLOG_MSVC_FORMAT_STRING const char_type * fmt, ...)
+        JMLOG_GCC_CHECK_PRINTF_FORMAT(2, 3) {
         if (this->getLevel() >= Level::Warn) {
             va_list arg_list;
             va_start(arg_list, fmt);
@@ -128,8 +128,8 @@ public:
         }
     }
 
-    void info(MSVC_FORMAT_STRING(const char_type * fmt), ...)
-        JMLOG_FORMAT_ATTR(printf, 1, 2) {
+    void info(JMLOG_MSVC_FORMAT_STRING const char_type * fmt, ...)
+        JMLOG_GCC_CHECK_PRINTF_FORMAT(2, 3) {
         if (this->getLevel() >= Level::Info) {
             va_list arg_list;
             va_start(arg_list, fmt);
@@ -140,17 +140,17 @@ public:
 
     template <typename ...Args>
     void info(const pattern_type & pattern,
-              MSVC_FORMAT_STRING(const char_type * fmt),
+              JMLOG_MSVC_FORMAT_STRING const char_type * fmt,
               Args && ... args) 
-        JMLOG_FORMAT_ATTR(printf, 2, 3) {
+        JMLOG_GCC_CHECK_PRINTF_FORMAT(3, 4) {
         if (this->getLevel() >= Level::Info) {
             (void)fmt;
             this->print(pattern, fmt, std::forward<Args>(args)...);
         }
     }
 
-    void error(MSVC_FORMAT_STRING(const char_type * fmt), ...)
-        JMLOG_FORMAT_ATTR(printf, 1, 2) {
+    void error(JMLOG_MSVC_FORMAT_STRING const char_type * fmt, ...)
+        JMLOG_GCC_CHECK_PRINTF_FORMAT(2, 3) {
         if (this->getLevel() >= Level::Error) {
             va_list arg_list;
             va_start(arg_list, fmt);
@@ -159,8 +159,8 @@ public:
         }
     }
 
-    void fatal(MSVC_FORMAT_STRING(const char_type * fmt), ...)
-        JMLOG_FORMAT_ATTR(printf, 1, 2) {
+    void fatal(JMLOG_MSVC_FORMAT_STRING const char_type * fmt, ...)
+        JMLOG_GCC_CHECK_PRINTF_FORMAT(2, 3) {
         if (this->getLevel() >= Level::Fatal) {
             va_list arg_list;
             va_start(arg_list, fmt);
